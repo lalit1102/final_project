@@ -1,0 +1,1 @@
+export { getLayoutContentStyle } from "./getLayoutContentStyle";
