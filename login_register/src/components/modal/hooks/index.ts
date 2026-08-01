@@ -1,1 +1,0 @@
-export { useModalPromise } from "./useModalPromise";

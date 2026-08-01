@@ -1,1 +1,0 @@
-export { useTablePagination } from "./useTablePagination";

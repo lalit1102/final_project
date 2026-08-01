@@ -1,1 +1,0 @@
-export { getCardContent } from "./getCardContent";

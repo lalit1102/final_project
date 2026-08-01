@@ -1,5 +1,0 @@
-export const DEFAULT_LAYOUT_SIDEBAR_WIDTH = 240;
-export const DEFAULT_LAYOUT_SIDEBAR_COLLAPSED_WIDTH = 80;
-export const DEFAULT_LAYOUT_HEADER_HEIGHT = 64;
-export const DEFAULT_LAYOUT_FOOTER_HEIGHT = 56;
-export const DEFAULT_THEME_MODE = "light" as const;
