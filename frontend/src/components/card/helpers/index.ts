@@ -1,0 +1,1 @@
+export { getCardContent } from "./getCardContent";
