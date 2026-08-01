@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 export type ButtonVariant = "solid" | "outlined" | "dashed" | "text" | "link";
 export type ButtonIconPosition = "start" | "end";
 
-export interface BaseButtonProps extends Omit<ButtonProps, "icon" | "children" | "danger"> {
+export interface BaseButtonProps extends Omit<ButtonProps, "icon" | "children"> {
   children?: ReactNode;
   icon?: ReactNode;
   iconPosition?: ButtonIconPosition;

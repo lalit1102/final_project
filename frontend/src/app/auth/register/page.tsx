@@ -2,19 +2,21 @@
 
 import React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { Divider, Typography, message } from "antd";
 
 import { Card } from "@/components/card";
 import { Button } from "@/components/button";
 import { Form, FormInput, FormPassword } from "@/components/form";
-import { Divider, Typography } from "antd";
-
-
-import type { RegisterRequest } from "@/types/auth";
-import styles from "../auth.module.css";
 import { GoogleIcon } from "@/components/icons/google-icon";
+import { useAuth, useGoogleAuth } from "@/hooks";
+import type { RegisterPayload } from "@/types/auth";
+import { getApiErrorMessage, getApiValidationErrors } from "@/utils/axiosError";
+import styles from "../auth.module.css";
+import { GoogleLoginButton } from "@/components/auth";
 
 const { Title, Text } = Typography;
 
@@ -31,6 +33,9 @@ const registerSchema = z.object({
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
+    const { loginWithGoogle, loading:googleLoading } = useGoogleAuth();
+  
+  const router = useRouter();
   const methods = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -40,34 +45,52 @@ export default function RegisterPage() {
       confirmPassword: "",
     },
   });
-
+  const { register, loading:authLoading } = useAuth();
   const {
     formState: { isSubmitting },
   } = methods;
 
+  const applyApiErrors = (errors: string[]) => {
+    errors.forEach((errorMessage) => {
+      const normalized = errorMessage.toLowerCase();
+      if (normalized.includes("name")) {
+        methods.setError("name", { type: "server", message: errorMessage });
+      } else if (normalized.includes("email")) {
+        methods.setError("email", { type: "server", message: errorMessage });
+      } else if (normalized.includes("password")) {
+        methods.setError("password", { type: "server", message: errorMessage });
+      } else if (normalized.includes("confirm")) {
+        methods.setError("confirmPassword", { type: "server", message: errorMessage });
+      }
+    });
+  };
+
   const onSubmit: SubmitHandler<RegisterFormValues> = async (data) => {
     try {
-      const payload: RegisterRequest = {
+      const payload: RegisterPayload = {
         name: data.name,
         email: data.email,
         password: data.password,
       };
 
-      console.log("Register Payload:", payload);
-
-      // TODO: Connect Axios API here in the future
-      // const res = await api.post("/auth/register", payload);
-
-      localStorage.setItem("accessToken", "demo-token");
+      methods.clearErrors();
+      await register(payload);
+      message.success("Account created successfully. Please sign in.");
+      router.replace("/auth/login");
     } catch (error) {
-      console.error("Register Error:", error);
+      const errorMessage = getApiErrorMessage(error);
+      const validationErrors = getApiValidationErrors(error);
+
+      applyApiErrors(validationErrors);
+      if (validationErrors.length === 0) {
+        message.error(errorMessage);
+      }
     }
   };
 
-  const handleGoogleSignup = () => {
-    console.log("Initiating Google Signup...");
-    // TODO: Connect NextAuth / Google OAuth here in the future
-  };
+ 
+
+  const isBusy = isSubmitting || authLoading;
 
   return (
     <div className={styles.authContainer}>
@@ -81,26 +104,18 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        <Button
-          type="default"
+        <GoogleLoginButton
           className={styles.googleButton}
-          onClick={handleGoogleSignup}
-          icon={<GoogleIcon/>}
-          block
-        >
-          Sign up with Google
-        </Button>
+          onSuccess={loginWithGoogle}
+          onError={() => message.error("Google login failed")}
+        />
 
         <Divider className={styles.divider}>
           <span className={styles.dividerText}>OR REGISTER WITH EMAIL</span>
         </Divider>
 
         <Form methods={methods} onSubmit={onSubmit} className={styles.form}>
-          <FormInput
-            name="name"
-            label="Full Name"
-            placeholder="John Doe"
-          />
+          <FormInput name="name" label="Full Name" placeholder="John Doe" />
           <FormInput
             name="email"
             label="Email Address"
@@ -119,7 +134,7 @@ export default function RegisterPage() {
           <Button
             type="primary"
             block
-            loading={isSubmitting}
+            loading={isBusy}
             htmlType="submit"
             className={styles.submitButton}
           >
