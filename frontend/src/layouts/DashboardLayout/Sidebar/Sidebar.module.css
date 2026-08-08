@@ -1,0 +1,43 @@
+.sider {
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  left: 0;
+  overflow: auto;
+  box-shadow: 2px 0 8px 0 rgba(29, 35, 41, 0.05);
+  z-index: 100;
+}
+
+.sidebarContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.logoContainer {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.04); /* Slight highlight in dark mode */
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.logoText {
+  color: white;
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.menu {
+  flex: 1;
+  border-right: none;
+}
+
+.drawer {
+  /* Any drawer specific overrides */
+}

@@ -1,0 +1,15 @@
+.sider {
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.logo {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu {
+  border-inline-end: 0 !important;
+}

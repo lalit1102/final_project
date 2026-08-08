@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { message } from "antd";
+import { App } from "antd";
 
 import { googleLogin } from "@/api";
 import { getApiErrorMessage } from "@/utils/axiosError";
 
 export default function useGoogleAuth() {
   const router = useRouter();
+    const { message } = App.useApp();
   const [loading, setLoading] = useState(false);
 
   const loginWithGoogle = async (credential: string) => {

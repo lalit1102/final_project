@@ -1,0 +1,48 @@
+.header {
+  padding: 0 24px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 99;
+}
+
+.leftContent {
+  display: flex;
+  align-items: center;
+}
+
+.trigger {
+  font-size: 18px;
+  line-height: 64px;
+  padding: 0 24px;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.trigger:hover {
+  color: #1890ff; /* Ideally use design token via CSS variable if possible, but AntD handles text button hover mostly */
+}
+
+.rightContent {
+  display: flex;
+  align-items: center;
+}
+
+.userDropdown {
+  cursor: pointer;
+  padding: 0 12px;
+  transition: all 0.3s;
+  border-radius: 4px;
+}
+
+.userDropdown:hover {
+  background: rgba(0, 0, 0, 0.025);
+}
+
+.userName {
+  font-weight: 500;
+  margin-left: 8px;
+}
