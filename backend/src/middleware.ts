@@ -6,7 +6,7 @@ import { STATUS_CODES } from "./constants/statusCodes";
 import { ERROR_MESSAGES } from "./constants/errorMessages";
 import { env } from "./config/env";
 
-const protectedRoutes = ["/api/auth/change-password", "/api/auth/profile", "/api/auth/logout"]; 
+const protectedRoutes = ["/api/auth/change-password", "/api/auth/profile", "/api/auth/logout", "/api/navigation"]; 
 const adminRoutes = ["/api/admin"];
 const allowedOrigin = env.FRONTEND_ORIGIN || "http://localhost:3000";
 
@@ -68,7 +68,7 @@ export async function middleware(req: NextRequest) {
   try {
     const decoded = await verifyEdgeAccessToken(accessToken);
 
-    if (isAdmin && decoded.role !== UserRole.ADMIN && decoded.role !== UserRole.SUPER_ADMIN) {
+    if (isAdmin && decoded.role !== UserRole.ADMIN) {
       return createJsonError(STATUS_CODES.FORBIDDEN, ERROR_MESSAGES.FORBIDDEN, ["Insufficient permissions"], origin);
     }
 
