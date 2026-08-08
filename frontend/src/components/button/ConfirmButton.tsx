@@ -5,8 +5,8 @@ import Button from "./Button";
 import type { ConfirmButtonProps } from "./types";
 
 export default function ConfirmButton({
-  title,
-  description,
+  confirmTitle,
+  confirmDescription,
   okText = "OK",
   cancelText = "Cancel",
   onConfirm,
@@ -16,10 +16,10 @@ export default function ConfirmButton({
 }: ConfirmButtonProps) {
   const handleConfirm = () => {
     Modal.confirm({
-      title,
-      content: description,
-      okText,
-      cancelText,
+      title: confirmTitle,
+      content: confirmDescription,
+      okText: typeof okText === 'string' ? okText : undefined,
+      cancelText: typeof cancelText === 'string' ? cancelText : undefined,
       onOk: onConfirm,
       onCancel,
     });

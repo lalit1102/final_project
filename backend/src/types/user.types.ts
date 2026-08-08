@@ -1,9 +1,10 @@
 import { Document } from "mongoose";
 
 export enum UserRole {
-  USER = "USER",
   ADMIN = "ADMIN",
-  SUPER_ADMIN = "SUPER_ADMIN"
+  TEACHER = "TEACHER",
+  STUDENT = "STUDENT",
+  PARENT = "PARENT",
 }
 
 export enum AuthProvider {

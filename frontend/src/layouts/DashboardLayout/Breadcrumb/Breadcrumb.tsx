@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react';
 import { Breadcrumb as AntBreadcrumb } from 'antd';
 import { usePathname } from 'next/navigation';

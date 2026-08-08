@@ -6,13 +6,13 @@ import { Role, NavItem } from '@/types/navigation.types';
 
 export const getNavigationByRoleConfig = (role?: Role | null): NavItem[] => {
   switch (role) {
-    case 'ROLE_ADMIN':
+    case 'ADMIN':
       return adminNavigation;
-    case 'ROLE_TEACHER':
+    case 'TEACHER':
       return teacherNavigation;
-    case 'ROLE_STUDENT':
+    case 'STUDENT':
       return studentNavigation;
-    case 'ROLE_PARENT':
+    case 'PARENT':
       return parentNavigation;
     default:
       return [];

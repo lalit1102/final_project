@@ -1,5 +1,4 @@
 import axios, { AxiosHeaders, type AxiosError, type InternalAxiosRequestConfig } from "axios";
-import { message } from "antd";
 
 const normalizeBaseUrl = (value: string) => value.replace(/\/$/, "");
 
@@ -58,24 +57,9 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error: AxiosError<{ message?: string; errors?: string[] }>) => {
     const status = error.response?.status;
-    const errorMessage = error.response?.data?.message ?? error.message ?? "Request failed";
-    const validationErrors = error.response?.data?.errors ?? [];
 
-    if (error.code === "ECONNABORTED" || error.message.includes("timeout")) {
-      message.error("The request timed out. Please try again.");
-    } else if (!error.response) {
-      message.error("Unable to reach the server. Please check that the backend is running.");
-    } else if (status === 401) {
-      message.warning("Your session has expired. Please sign in again.");
+    if (status === 401) {
       redirectToLogin();
-    } else if (status === 403) {
-      message.error("You do not have permission to perform this action.");
-    } else if (status === 500) {
-      message.error("A server error occurred. Please try again later.");
-    } else if (validationErrors.length > 0) {
-      message.error(validationErrors.join(" "));
-    } else if (errorMessage) {
-      message.error(errorMessage);
     }
 
     return Promise.reject(error);

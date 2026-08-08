@@ -68,7 +68,7 @@ export async function middleware(req: NextRequest) {
   try {
     const decoded = await verifyEdgeAccessToken(accessToken);
 
-    if (isAdmin && decoded.role !== UserRole.ADMIN && decoded.role !== UserRole.SUPER_ADMIN) {
+    if (isAdmin && decoded.role !== UserRole.ADMIN) {
       return createJsonError(STATUS_CODES.FORBIDDEN, ERROR_MESSAGES.FORBIDDEN, ["Insufficient permissions"], origin);
     }
 

@@ -1,24 +1,24 @@
+"use client";
+
 import React, { useEffect, useState, ReactNode } from 'react';
 import { Layout } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
-import { Sidebar } from './Sidebar';
-import { Header } from './Header';
-import { Breadcrumb } from './Breadcrumb';
-import { Footer } from './Footer';
+import { Sidebar } from './Sidebar/Sidebar';
+import { Header } from './Header/Header';
+import { Breadcrumb } from './Breadcrumb/Breadcrumb';
+import { Footer } from './Footer/Footer';
 import { NavigationService } from '@/services/navigation';
 import { toggleSidebar, toggleMobileDrawer, setMobileDrawerOpen } from '@/store/slices/layout.slice';
+import type { User } from '@/types/auth';
 import styles from './DashboardLayout.module.css';
 
-// Assume RootState is exported from your store. Adjust import as necessary.
-// import { RootState } from '@/store'; 
-// For now we'll define a basic expected state shape to satisfy TypeScript without strict RootState
 interface ExpectedRootState {
   layout: {
     collapsed: boolean;
     mobileDrawerOpen: boolean;
   };
   auth?: {
-    user: { name: string; role: string; permissions?: string[] } | null;
+    user: User | null;
   };
 }
 
@@ -32,27 +32,22 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   const dispatch = useDispatch();
   
   const { collapsed, mobileDrawerOpen } = useSelector((state: ExpectedRootState) => state.layout);
-  // Fetch user from auth state
   const user = useSelector((state: ExpectedRootState) => state.auth?.user);
 
   const [isMobile, setIsMobile] = useState(false);
 
-  // Responsive strategy: Detect mobile view
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
     };
 
-    // Initial check
     handleResize();
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Fetch and filter navigation based on user role and permissions
-  // Casting role to any to bypass strict type checking against NavItem Role types temporarily
-  const rawNavItems = NavigationService.getNavigationByRole((user?.role as any) || null);
+  const rawNavItems = NavigationService.getNavigationByRole((user?.role || null) as import('@/types/navigation.types').Role | null);
   const allowedNavItems = NavigationService.filterNavigationByPermission(
     rawNavItems,
     user?.permissions || []
@@ -71,7 +66,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   };
 
   const handleLogout = () => {
-    // Implement logout logic here (e.g. dispatch logout action)
     console.log('Logging out...');
   };
 
@@ -90,7 +84,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           onToggleCollapse={handleToggleCollapse}
           isMobile={isMobile}
           onLogout={handleLogout}
-          user={user as any}
+          user={user}
         />
         <Breadcrumb />
         <Content className={styles.content}>
@@ -103,3 +97,5 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
     </Layout>
   );
 };
+
+export default DashboardLayout;

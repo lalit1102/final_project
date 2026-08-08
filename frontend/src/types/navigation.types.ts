@@ -1,4 +1,4 @@
-export type Role = 'ROLE_ADMIN' | 'ROLE_TEACHER' | 'ROLE_STUDENT' | 'ROLE_PARENT';
+export type Role = 'ADMIN' | 'TEACHER' | 'STUDENT' | 'PARENT';
 
 export type Permission = string; // Define more granular permissions later, e.g. 'read:users' | 'write:users'
 

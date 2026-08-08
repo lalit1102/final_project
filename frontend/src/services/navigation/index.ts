@@ -1,11 +1,14 @@
 import { NavItem, Role, Permission } from '@/types/navigation.types';
 import { getNavigationByRoleConfig } from '@/config/navigation';
 import { getIcon } from '@/components/navigation/iconMap';
-import type { MenuProps } from 'antd';
-import Link from 'next/link';
-import React from 'react';
 
-type MenuItem = Required<MenuProps>['items'][number];
+export interface NavigationServiceMenuItem {
+  key: string;
+  label: string;
+  icon?: React.ReactNode;
+  path?: string;
+  children?: NavigationServiceMenuItem[];
+}
 
 /**
  * Navigation Service Layer
@@ -27,9 +30,8 @@ export const NavigationService = {
     return navItems
       .filter((item) => {
         if (!item.permissions || item.permissions.length === 0) {
-          return true; // No specific permissions required
+          return true;
         }
-        // Check if user has all required permissions for this item
         return item.permissions.every((perm) => userPermissions.includes(perm));
       })
       .map((item) => {
@@ -41,7 +43,6 @@ export const NavigationService = {
         }
         return item;
       })
-      // Filter out items that have empty children after filtering
       .filter((item) => {
         if (item.children && item.children.length === 0) {
           return false;
@@ -51,23 +52,22 @@ export const NavigationService = {
   },
 
   /**
-   * Transforms raw navigation items into Ant Design MenuProps['items']
+   * Transforms raw navigation items into plain menu items with paths.
+   * The component layer is responsible for rendering React nodes (e.g. Links).
    */
-  transformNavigationToMenuItems(navItems: NavItem[]): MenuItem[] {
+  transformNavigationToMenuItems(navItems: NavItem[]): NavigationServiceMenuItem[] {
     return navItems.map((item) => {
-      const iconNode = getIcon(item.icon);
-
-      let labelNode: React.ReactNode = item.label;
-      if (item.path && !item.children) {
-        labelNode = <Link href={item.path}>{item.label}</Link>;
-      }
-
-      return {
+      const menuItem: NavigationServiceMenuItem = {
         key: item.key,
-        icon: iconNode,
-        label: labelNode,
-        children: item.children ? this.transformNavigationToMenuItems(item.children) : undefined,
-      } as MenuItem;
+        label: item.label,
+        icon: getIcon(item.icon),
+        path: item.path,
+        children: item.children
+          ? this.transformNavigationToMenuItems(item.children)
+          : undefined,
+      };
+
+      return menuItem;
     });
   },
 };

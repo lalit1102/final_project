@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Divider, Typography, message } from "antd";
+import { Divider, Typography, App } from "antd";
 
 import { Card } from "@/components/card";
 import { Button } from "@/components/button";
@@ -31,6 +31,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const { loginWithGoogle, loading:googleLoading } = useGoogleAuth();
   const router = useRouter();
+  const { message } = App.useApp();
   const methods = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {

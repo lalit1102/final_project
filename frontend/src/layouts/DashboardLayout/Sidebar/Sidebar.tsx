@@ -1,5 +1,8 @@
+"use client";
+
 import React from 'react';
 import { Layout, Menu, Drawer } from 'antd';
+import Link from 'next/link';
 import styles from './Sidebar.module.css';
 import { usePathname } from 'next/navigation';
 import { NavItem } from '@/types/navigation.types';
@@ -23,10 +26,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isMobile,
 }) => {
   const pathname = usePathname();
-  const menuItems = NavigationService.transformNavigationToMenuItems(navItems);
+  const rawMenuItems = NavigationService.transformNavigationToMenuItems(navItems);
 
-  // Simple active route matching
-  const selectedKeys = [pathname]; // A more robust matching might be needed for nested dynamic routes
+  const antMenuItems = rawMenuItems.map((item) => ({
+    key: item.key,
+    icon: item.icon,
+    label: item.path && !item.children ? (
+      <Link href={item.path}>{item.label}</Link>
+    ) : (
+      item.label
+    ),
+    children: item.children?.map((child) => ({
+      key: child.key,
+      icon: child.icon,
+      label: child.path && !child.children ? (
+        <Link href={child.path}>{child.label}</Link>
+      ) : (
+        child.label
+      ),
+    })),
+  }));
+
+  const selectedKeys = [pathname];
 
   const menuContent = (
     <div className={styles.sidebarContainer}>
@@ -35,10 +56,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <h1 className={styles.logoText}>{collapsed && !isMobile ? 'LS' : 'LearnSphere'}</h1>
       </div>
       <Menu
-        theme="dark" // Assuming dark theme for sidebar, could be dynamic
+        theme="dark"
         mode="inline"
         selectedKeys={selectedKeys}
-        items={menuItems}
+        items={antMenuItems}
         className={styles.menu}
       />
     </div>

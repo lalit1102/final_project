@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react';
 import { Layout, Button, Dropdown, Avatar, theme, Space } from 'antd';
 import {
@@ -9,6 +11,7 @@ import {
 } from '@ant-design/icons';
 import styles from './Header.module.css';
 import type { MenuProps } from 'antd';
+import type { User } from '@/types/auth';
 
 const { Header: AntHeader } = Layout;
 
@@ -17,7 +20,7 @@ interface AppHeaderProps {
   onToggleCollapse: () => void;
   isMobile: boolean;
   onLogout?: () => void;
-  user?: { name: string; role: string }; // Replace with actual user type
+  user?: User | null;
 }
 
 export const Header: React.FC<AppHeaderProps> = ({

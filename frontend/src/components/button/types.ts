@@ -35,8 +35,8 @@ export interface IconButtonProps extends Omit<BaseButtonProps, "children"> {
 }
 
 export interface ConfirmButtonProps extends BaseButtonProps {
-  title?: ReactNode;
-  description?: ReactNode;
+  confirmTitle?: ReactNode;
+  confirmDescription?: ReactNode;
   okText?: ReactNode;
   cancelText?: ReactNode;
   onConfirm?: () => void;

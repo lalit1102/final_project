@@ -4,6 +4,7 @@ export interface User {
   email: string;
   role?: string;
   avatar?: string;
+  permissions?: string[];
 }
 
 export interface LoginPayload {

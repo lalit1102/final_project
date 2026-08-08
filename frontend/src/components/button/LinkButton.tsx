@@ -33,18 +33,17 @@ export default function LinkButton({
   }
 
   return (
-    <AntButton
-      {...rest}
-      className={className}
-      style={resolvedStyle}
-      size={size}
-      disabled={composeDisabled(disabled, permissionDisabled)}
-      aria-disabled={composeDisabled(disabled, permissionDisabled)}
-      as={Link}
-      href={href}
-      target={target}
-    >
-      {children}
-    </AntButton>
+    <Link href={href} target={target} passHref legacyBehavior>
+      <AntButton
+        {...rest}
+        className={className}
+        style={resolvedStyle}
+        size={size}
+        disabled={composeDisabled(disabled, permissionDisabled)}
+        aria-disabled={composeDisabled(disabled, permissionDisabled)}
+      >
+        {children}
+      </AntButton>
+    </Link>
   );
 }
