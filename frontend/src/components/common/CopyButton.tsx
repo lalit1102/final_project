@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Button, Tooltip, message } from 'antd';
+import { Button, Tooltip, App } from 'antd';
 import { CopyOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import type { CopyButtonProps } from './types';
 import { useCopyFeedback } from './hooks/useCopyFeedback';
@@ -20,6 +20,7 @@ export const CopyButton: React.FC<CopyButtonProps> = ({
   className = '',
   style,
 }) => {
+  const { message } = App.useApp();
   const { isCopied, error, copy } = useCopyFeedback();
 
   const handleCopy = () => {

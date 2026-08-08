@@ -168,6 +168,22 @@ console.log("Headers x-user-role:", req.headers.get("x-user-role"));
     }
   }
 
+  async getProfile(req: NextRequest) {
+    try {
+      const userId = req.headers.get("x-user-id");
+      if (!userId) throw new AppError(ERROR_MESSAGES.UNAUTHORIZED, STATUS_CODES.UNAUTHORIZED);
+
+      const user = await authService.getProfile(userId);
+
+      return NextResponse.json(
+        sendResponse(user, "Profile fetched successfully"),
+        { status: STATUS_CODES.OK }
+      );
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
   async updateProfile(req: NextRequest) {
     try {
       const userId = req.headers.get("x-user-id");

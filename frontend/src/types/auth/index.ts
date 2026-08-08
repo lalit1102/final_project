@@ -4,33 +4,57 @@ export interface User {
   email: string;
   role?: string;
   avatar?: string;
+  permissions?: string[];
 }
 
-export interface LoginRequest {
+export interface LoginPayload {
   email: string;
-  password?: string; // Optional because Google auth won't use password
+  password: string;
 }
 
 export interface LoginResponse {
   user: User;
-  token: string;
 }
 
-export interface RegisterRequest {
+export interface RegisterPayload {
   name: string;
   email: string;
-  password?: string; // Optional because Google signup won't use password
+  password: string;
 }
 
 export interface RegisterResponse {
   user: User;
-  token: string;
 }
 
-export interface AuthState {
-  user: User | null;
-  token: string | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  error: string | null;
+export type ProfileResponse = User;
+
+export interface ForgotPasswordPayload {
+  email: string;
+}
+
+export interface ResetPasswordPayload {
+  token: string;
+  newPassword: string;
+}
+
+export interface ChangePasswordPayload {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T | null;
+  errors: string[];
+  timestamp: string;
+}
+
+export interface GoogleLoginPayload {
+    idToken: string;
+}
+
+export interface GoogleLoginResponse {
+  user: User;
+  accessToken: string;
 }

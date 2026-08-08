@@ -183,6 +183,20 @@ export class AuthService {
     }
   }
 
+  async getProfile(userId: string) {
+    const user = await userRepository.findById(userId);
+
+    if (!user) throw new AppError(ERROR_MESSAGES.NOT_FOUND, STATUS_CODES.NOT_FOUND);
+
+    return {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      avatar: user.avatar,
+    };
+  }
+
   async updateProfile(userId: string, data: UpdateProfileInput) {
     const user = await userRepository.update(userId, {
       ...(data.name && { name: data.name }),
