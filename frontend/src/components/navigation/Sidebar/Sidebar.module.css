@@ -1,0 +1,12 @@
+.sidebar {
+  background-color: var(--ant-color-menu-bg);
+  border-right: 1px solid var(--ant-color-border);
+  transition: width 200ms ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebarContent {
+  flex: 1;
+  overflow-y: auto;
+}

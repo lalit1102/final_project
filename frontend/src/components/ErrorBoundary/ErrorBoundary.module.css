@@ -1,0 +1,13 @@
+.errorBoundary {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--ant-default-padding);
+}
+
+@media (max-width: 576px) {
+  .errorBoundary {
+    padding: 16px;
+  }
+}

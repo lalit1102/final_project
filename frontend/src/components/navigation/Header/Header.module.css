@@ -1,0 +1,26 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--ant-header-height, 56px);
+  padding: 0 var(--ant-default-padding);
+  background-color: var(--ant-color-header-bg);
+  border-bottom: 1px solid var(--ant-color-border);
+  gap: 12px;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+}
+
+.headerCenter {
+  flex: 1;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+}

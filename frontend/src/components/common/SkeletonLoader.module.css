@@ -1,0 +1,9 @@
+.skeletonLoader {
+  width: 100%;
+}
+
+@media (max-width: 576px) {
+  .skeletonLoader {
+    padding: 8px;
+  }
+}

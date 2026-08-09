@@ -1,0 +1,13 @@
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--footer-height, 48px);
+  padding: 0 var(--ant-default-padding);
+  border-top: 1px solid var(--ant-color-border);
+  background-color: var(--ant-color-footer-bg);
+}
+
+.footerText {
+  font-size: 12px;
+}

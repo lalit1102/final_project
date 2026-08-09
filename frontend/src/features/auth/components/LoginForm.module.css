@@ -1,0 +1,21 @@
+.loginFormContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--auth-form-gap, 24px);
+}
+
+.loginFormHeader {
+  text-align: center;
+}
+
+.loginFormTitle {
+  margin: 0;
+  font-size: var(--auth-title-font-size, 24px);
+  font-weight: var(--auth-title-font-weight, 600);
+}
+
+.loginFormSubtitle {
+  margin: var(--auth-subtitle-margin, 4px 0 0);
+  color: var(--ant-color-text-secondary);
+  font-size: var(--auth-subtitle-font-size, 14px);
+}

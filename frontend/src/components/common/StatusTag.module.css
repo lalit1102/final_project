@@ -1,0 +1,13 @@
+.statusTag {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.dot::before {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 4px;
+  border-radius: 50%;
+  background-color: currentColor;
+}

@@ -1,0 +1,10 @@
+.pageContainer {
+  padding: var(--page-padding, 24px);
+  max-width: var(--page-max-width, none);
+}
+
+@media (max-width: 576px) {
+  .pageContainer {
+    padding: 16px;
+  }
+}

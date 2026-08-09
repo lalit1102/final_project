@@ -1,0 +1,53 @@
+.profileCard {
+  max-width: 600px;
+}
+
+.profileContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profileHeader {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.profileName {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title {
+  margin: 0;
+}
+
+.roleTag {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.email {
+  font-size: 14px;
+}
+
+.actions {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+@media (max-width: 576px) {
+  .profileHeader {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,12 @@
+.userMenu {
+  cursor: pointer;
+}
+
+.userName {
+  font-weight: 500;
+  font-size: 14px;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
