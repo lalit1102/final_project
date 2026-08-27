@@ -42,7 +42,7 @@ const DashboardHeader: React.FC<HeaderProps> = ({
       </div>
 
       <div className={styles.headerRight}>
-        <Space direction="horizontal" size="middle">
+        <Space orientation="horizontal" size="middle">
           <ThemeToggle />
           <UserMenu />
         </Space>

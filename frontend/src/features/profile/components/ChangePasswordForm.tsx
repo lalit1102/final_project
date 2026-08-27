@@ -130,7 +130,7 @@ const ChangePasswordForm: React.FC<ChangePasswordFormProps> = ({
         </Form.Item>
 
         <Form.Item>
-          <Space direction="horizontal" size="middle">
+          <Space orientation="horizontal" size="middle">
             <Button
               type="primary"
               icon={<SaveOutlined />}

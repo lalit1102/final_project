@@ -7,7 +7,7 @@
  * automatically sends accessToken and refreshToken cookies.
  */
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001";
+  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3000";
 
 /** Request timeout in milliseconds. */
 export const API_TIMEOUT_MS = 10000;

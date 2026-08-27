@@ -1,0 +1,8 @@
+.dataTableContainer {
+  background-color: var(--table-bg, #ffffff);
+  border-radius: var(--table-border-radius, 8px);
+}
+
+.emptyWrapper {
+  padding: 24px;
+}

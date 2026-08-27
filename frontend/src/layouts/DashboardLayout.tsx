@@ -97,9 +97,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           closable={true}
           onClose={handleMobileClose}
           open={mobileDrawerOpen}
-          bodyStyle={{ padding: 0 }}
-          headerStyle={{ padding: '12px 16px' }}
-          width={240}
+          size={240}
+          styles={{
+            body: { padding: 0 },
+            header: { padding: '12px 16px' },
+          }}
           maskClosable={true}
           destroyOnClose={true}
         >

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Avatar, Dropdown, Space, Typography } from 'antd';
 import type { MenuProps } from 'antd';
 import {
@@ -12,6 +12,7 @@ import { useAuth } from '@/features/auth/contexts/AuthContext';
 import { useAppDispatch, useAppSelector } from '@/hooks/storeHooks';
 import { toggleSidebar } from '@/store/slices';
 import type { User } from '@/types/user';
+import ConfirmDialog from '@/components/common/ConfirmDialog/ConfirmDialog';
 import styles from './UserMenu.module.css';
 
 const UserMenu: React.FC = () => {
@@ -20,7 +21,18 @@ const UserMenu: React.FC = () => {
 
   const sidebarCollapsed = useAppSelector((state) => state.ui.sidebarCollapsed);
 
+  const [isConfirmOpen, setConfirmOpen] = useState(false);
+
+  const handleOpenConfirm = () => {
+    setConfirmOpen(true);
+  };
+
+  const handleCancelLogout = () => {
+    setConfirmOpen(false);
+  };
+
   const handleLogout = async () => {
+    setConfirmOpen(false);
     try {
       await logout();
     } catch {
@@ -57,32 +69,45 @@ const UserMenu: React.FC = () => {
       key: 'logout',
       icon: <LogoutOutlined />,
       label: 'Logout',
-      onClick: handleLogout,
+      onClick: handleOpenConfirm,
     },
   ];
 
   const avatarSrc = userObj?.avatar ?? undefined;
 
-  return (
-    <Dropdown
-      menu={{ items }}
-      placement="bottomRight"
-      arrow
-      trigger={['click']}
-    >
-      <Space className={styles.userMenu} size="middle" onClick={(e) => e.preventDefault()}>
-        <Typography.Text className={styles.userName} type="secondary">
-          {userObj?.name ?? 'User'}
-        </Typography.Text>
-        <Avatar
-          src={avatarSrc}
-          icon={!avatarSrc && <UserOutlined />}
-          alt={userObj?.name ?? 'User avatar'}
-          size="default"
-        />
-      </Space>
-    </Dropdown>
-  );
-};
+   return (
+     <React.Fragment>
+       <Dropdown
+         menu={{ items }}
+         placement="bottomRight"
+         arrow
+         trigger={['click']}
+       >
+         <Space className={styles.userMenu} size="middle" onClick={(e) => e.preventDefault()}>
+           <Typography.Text className={styles.userName} type="secondary">
+             {userObj?.name ?? 'User'}
+           </Typography.Text>
+           <Avatar
+             src={avatarSrc}
+             icon={!avatarSrc && <UserOutlined />}
+             alt={userObj?.name ?? 'User avatar'}
+             size="default"
+           />
+         </Space>
+       </Dropdown>
+
+      <ConfirmDialog
+        open={isConfirmOpen}
+        title="Confirm Logout"
+        content="Are you sure you want to log out? Your session will be permanently ended."
+        okText="Logout"
+        cancelText="Cancel"
+        okButtonDanger
+        onConfirm={handleLogout}
+        onCancel={handleCancelLogout}
+      />
+    </React.Fragment>
+   );
+ };
 
 export default UserMenu;

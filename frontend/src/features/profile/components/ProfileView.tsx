@@ -66,7 +66,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user }) => {
           {user.email}
         </Typography.Text>
 
-        <Space direction="vertical" className={styles.actions} size="middle">
+        <Space orientation="vertical" className={styles.actions} size="middle">
           <Button
             type="primary"
             icon={<EditOutlined />}
