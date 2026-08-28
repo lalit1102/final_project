@@ -16,6 +16,8 @@ export const ERROR_MESSAGES = {
   SUBJECT_NOT_FOUND: 'Subject not found.',
   COURSE_EXISTS: 'A course with this code already exists.',
   COURSE_NOT_FOUND: 'Course not found.',
+  CLASS_EXISTS: 'A class with this code already exists.',
+  CLASS_NOT_FOUND: 'Class not found.',
   USER_NOT_FOUND: 'User not found.',
   INVALID_TEACHER: 'Invalid teacher assignment.',
 } as const;
