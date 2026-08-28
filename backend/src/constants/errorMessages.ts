@@ -27,5 +27,8 @@ export const ERROR_MESSAGES = {
   ENROLLMENT_NOT_FOUND: 'Enrollment not found.',
   ENROLLMENT_EXISTS: 'Student is already enrolled in this class.',
   INVALID_STUDENT: 'Referenced user is not a STUDENT.',
-  CLASS_NOT_ENROLLED: 'Student is not enrolled in this class.',
+   CLASS_NOT_ENROLLED: 'Student is not enrolled in this class.',
+   ASSIGNMENT_NOT_FOUND: 'Assignment not found.',
+   ASSIGNMENT_EXISTS: 'An assignment with this title already exists for this class.',
+   INVALID_DUE_DATE: 'Due date must be in the future.',
 } as const;
