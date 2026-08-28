@@ -64,7 +64,13 @@ const defaultMockEnrollmentRepo = {
   },
   exists: async (_filter: unknown) => false,
   totalCount: async (filter?: Record<string, unknown>) => {
-    let result = mockEnrollments.filter((e) => e.isActive !== false);
+    let result = mockEnrollments;
+    const isActiveFilter = filter?.isActive;
+    if (isActiveFilter !== undefined) {
+      result = result.filter((e) => e.isActive === isActiveFilter);
+    } else {
+      result = result.filter((e) => e.isActive !== false);
+    }
     if (filter?.studentId) {
       if (Array.isArray(filter.studentId)) {
         result = result.filter((e) => (filter.studentId as unknown[]).some((id) => e.studentId?.toString() === id?.toString()));
@@ -84,8 +90,14 @@ const defaultMockEnrollmentRepo = {
     if (filter?.status) result = result.filter((e) => e.status === filter.status);
     return result.length;
   },
-  findAllPaginated: async (filter?: Record<string, unknown>) => {
-    let result = mockEnrollments.filter((e) => e.isActive !== false);
+   findAllPaginated: async (filter?: Record<string, unknown>) => {
+    let result = mockEnrollments;
+    const isActiveFilter = filter?.isActive;
+    if (isActiveFilter !== undefined) {
+      result = result.filter((e) => e.isActive === isActiveFilter);
+    } else {
+      result = result.filter((e) => e.isActive !== false);
+    }
     if (filter?.studentId) {
       if (Array.isArray(filter.studentId)) {
         result = result.filter((e) => (filter.studentId as unknown[]).some((id) => e.studentId?.toString() === id?.toString()));
@@ -94,6 +106,9 @@ const defaultMockEnrollmentRepo = {
       } else {
         result = result.filter((e) => e.studentId?.toString() === filter.studentId?.toString());
       }
+    }
+    if (filter?.courseId) {
+      result = result.filter((e) => e.courseId?.toString() === (filter.courseId as unknown as IEnrollment["courseId"]).toString());
     }
     if (filter?.classId) {
       if ((filter.classId as { $in?: unknown[] })?.["$in"]) {
@@ -106,7 +121,6 @@ const defaultMockEnrollmentRepo = {
     return result as IEnrollment[];
   },
   findByStudentAndClass: async (sid: string, cid: string) => mockEnrollments.find((e) => e.studentId?.toString() === sid && e.classId?.toString() === cid && e.isActive) ?? null,
-  findByStudent: async (sid: string) => mockEnrollments.filter((e) => e.studentId?.toString() === sid && e.isActive) as IEnrollment[],
 };
 
 const defaultMockClassRepo = {
@@ -150,7 +164,6 @@ function installMockRepo(): void {
   enrollmentRepo.totalCount = merged.totalCount;
   enrollmentRepo.findAllPaginated = merged.findAllPaginated;
   enrollmentRepo.findByStudentAndClass = merged.findByStudentAndClass;
-  enrollmentRepo.findByStudent = merged.findByStudent;
 
   const classRepo = classRepository as unknown as Record<string, unknown>;
   const classMerged = { ...defaultMockClassRepo, ...classOverrides };
@@ -222,6 +235,16 @@ describe("EnrollmentService", () => {
       assert.equal(result.enrollments.length, 2);
     });
 
+    it("PARENT child lookup uses correct STUDENT role (not lowercase 'student')", async () => {
+      const result = await enrollmentService.listEnrollments({ page: 1, limit: 20 }, parent);
+      assert.equal(result.enrollments.length, 2);
+      const childStudents = Object.values(mockUsers).filter(
+        (u) => u && u.role === UserRole.STUDENT && u.isActive && (u.parentIds ?? []).some((pid) => pid?.toString() === parent),
+      );
+      assert.equal(childStudents.length, 1);
+      assert.equal(childStudents[0].role, UserRole.STUDENT);
+    });
+
     it("PARENT with no children gets empty result", async () => {
       mockUsers[student2] = { ...mockUsers[student2], parentIds: [] };
       const result = await enrollmentService.listEnrollments({ page: 1, limit: 20 }, otherParent);
@@ -251,6 +274,66 @@ describe("EnrollmentService", () => {
       const result = await enrollmentService.listEnrollments(
         { page: 1, limit: 20, studentId: student },
         adminId,
+      );
+      assert.equal(result.enrollments.length, 2);
+    });
+
+    it("ADMIN can filter by isActive=false (audit access)", async () => {
+      const result = await enrollmentService.listEnrollments(
+        { page: 1, limit: 20, isActive: false },
+        adminId,
+      );
+      assert.equal(result.enrollments.length, 1);
+      assert.equal(result.enrollments[0].isActive, false);
+    });
+
+    it("STUDENT isActive=false is ignored (stays active-only)", async () => {
+      const result = await enrollmentService.listEnrollments(
+        { page: 1, limit: 20, isActive: false },
+        student,
+      );
+      assert.equal(result.enrollments.length, 2);
+      assert.equal(result.enrollments.every((e) => e.isActive === true), true);
+    });
+
+    it("PARENT isActive=false is ignored (stays active-only)", async () => {
+      const result = await enrollmentService.listEnrollments(
+        { page: 1, limit: 20, isActive: false },
+        parent,
+      );
+      assert.equal(result.enrollments.length, 2);
+      assert.equal(result.enrollments.every((e) => e.isActive === true), true);
+    });
+
+    it("TEACHER isActive=false is ignored (stays active-only)", async () => {
+      const result = await enrollmentService.listEnrollments(
+        { page: 1, limit: 20, isActive: false },
+        teacher,
+      );
+      assert.equal(result.enrollments.length, 2);
+      assert.equal(result.enrollments.every((e) => e.isActive === true), true);
+    });
+
+    it("STUDENT cannot filter by courseId (ignored)", async () => {
+      const result = await enrollmentService.listEnrollments(
+        { page: 1, limit: 20, courseId: "707f1f77bcf86cd799439011" },
+        student,
+      );
+      assert.equal(result.enrollments.length, 2);
+    });
+
+    it("ADMIN can filter by courseId", async () => {
+      const result = await enrollmentService.listEnrollments(
+        { page: 1, limit: 20, courseId: "707f1f77bcf86cd799439011" },
+        adminId,
+      );
+      assert.equal(result.enrollments.length, 2);
+    });
+
+    it("TEACHER can filter by courseId within own classes", async () => {
+      const result = await enrollmentService.listEnrollments(
+        { page: 1, limit: 20, courseId: "707f1f77bcf86cd799439011" },
+        teacher,
       );
       assert.equal(result.enrollments.length, 2);
     });
@@ -439,23 +522,62 @@ describe("EnrollmentService", () => {
       }
     });
 
-    it("should reject duplicate enrollment", async () => {
-      enrollmentOverrides = {
-        findByStudentAndClass: async () => mockEnrollments[0] as IEnrollment,
-      };
-      installMockRepo();
+     it("should reject duplicate enrollment", async () => {
+       enrollmentOverrides = {
+         findByStudentAndClass: async () => mockEnrollments[0] as IEnrollment,
+       };
+       installMockRepo();
 
-      try {
-        await enrollmentService.createEnrollment(
-          { studentId: student, classId: "807f1f77bcf86cd799439011" },
-          adminId,
-        );
-        assert.fail("Should have thrown");
-      } catch (error) {
-        assert.ok(error instanceof AppError);
-        assert.equal(error.statusCode, STATUS_CODES.CONFLICT);
-      }
-    });
+       try {
+         await enrollmentService.createEnrollment(
+           { studentId: student, classId: "807f1f77bcf86cd799439011" },
+           adminId,
+         );
+         assert.fail("Should have thrown");
+       } catch (error) {
+         assert.ok(error instanceof AppError);
+         assert.equal(error.statusCode, STATUS_CODES.CONFLICT);
+       }
+     });
+
+     it("should allow re-enrollment after soft delete (inactive record does not block)", async () => {
+       enrollmentOverrides = {
+         findByStudentAndClass: async () => null,
+       };
+       installMockRepo();
+
+       const result = await enrollmentService.createEnrollment(
+         { studentId: student, classId: "807f1f77bcf86cd799439011" },
+         adminId,
+       );
+       assert.equal(result.studentId, student);
+       assert.equal(result.isActive, true);
+     });
+
+     it("should return enrollment-specific 409 for duplicate-key race condition", async () => {
+       enrollmentOverrides = {
+         findByStudentAndClass: async () => null,
+         create: async () => {
+           const dupError: { code: number; name: string } & Error = new Error("E11000 duplicate key") as { code: number; name: string } & Error;
+           dupError.code = 11000;
+           dupError.name = "MongoServerError";
+           throw dupError;
+         },
+       };
+       installMockRepo();
+
+       try {
+         await enrollmentService.createEnrollment(
+           { studentId: student, classId: "807f1f77bcf86cd799439011" },
+           adminId,
+         );
+         assert.fail("Should have thrown");
+       } catch (error) {
+         assert.ok(error instanceof AppError);
+         assert.equal(error.statusCode, STATUS_CODES.CONFLICT);
+         assert.ok(error.message.includes("enrolled") || error.message.includes("ENROLLMENT"));
+       }
+     });
 
     it("should derive courseId from classId (not from body)", async () => {
       enrollmentOverrides = {

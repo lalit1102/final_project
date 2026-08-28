@@ -113,6 +113,15 @@ describe("enrollment.validation schemas", () => {
       });
       assert.equal(result.success, false);
     });
+
+    it("should reject lowercase status (nativeEnum is case-sensitive)", () => {
+      const result = createEnrollmentSchema.safeParse({
+        studentId: VALID_STUDENT_ID,
+        classId: VALID_CLASS_ID,
+        status: "active",
+      });
+      assert.equal(result.success, false);
+    });
   });
 
   describe("updateEnrollmentSchema (PUT)", () => {
@@ -236,6 +245,16 @@ describe("enrollment.validation schemas", () => {
     it("should accept valid classId filter", () => {
       const result = enrollmentListSchema.safeParse({ classId: VALID_CLASS_ID });
       assert.equal(result.success, true);
+    });
+
+    it("should accept valid courseId filter", () => {
+      const result = enrollmentListSchema.safeParse({ courseId: VALID_COURSE_ID });
+      assert.equal(result.success, true);
+    });
+
+    it("should reject invalid courseId filter", () => {
+      const result = enrollmentListSchema.safeParse({ courseId: "not-valid" });
+      assert.equal(result.success, false);
     });
 
     it("should reject invalid studentId filter", () => {

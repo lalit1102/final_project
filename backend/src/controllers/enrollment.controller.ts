@@ -18,7 +18,7 @@ export class EnrollmentController {
       const { searchParams } = new URL(req.url);
 
       const rawParams: Record<string, string | null> = {};
-      for (const key of ["page", "limit", "studentId", "classId", "status", "isActive", "search"]) {
+      for (const key of ["page", "limit", "studentId", "classId", "courseId", "status", "isActive", "search"]) {
         rawParams[key] = searchParams.get(key);
       }
 

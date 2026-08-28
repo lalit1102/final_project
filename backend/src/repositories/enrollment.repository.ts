@@ -49,10 +49,6 @@ export class EnrollmentRepository {
     return Enrollment.findOne({ studentId, classId, isActive: true }).lean();
   }
 
-  async findByStudent(studentId: string): Promise<IEnrollment[]> {
-    return Enrollment.find({ studentId, isActive: true }).sort({ createdAt: -1 }).lean();
-  }
-
   async findClassIdsByTeacher(teacherId: string): Promise<string[]> {
     const { classRepository } = await import("@/repositories/class.repository");
     return classRepository.findActiveClassIdsByTeacher(teacherId);

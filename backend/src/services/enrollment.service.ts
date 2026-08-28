@@ -104,23 +104,10 @@ export class EnrollmentService {
     return cls;
   }
 
-  private async verifyParentOwnsStudent(studentId: string, requestorId: string): Promise<IUser> {
-    const student = await this.verifyStudent(studentId);
-
-    const parentIds = student.parentIds ?? [];
-    const isParent = parentIds.some((pid) => pid.toString() === requestorId);
-
-    if (!isParent) {
-      throw new AppError(ERROR_MESSAGES.CLASS_NOT_ENROLLED, STATUS_CODES.NOT_FOUND, ["Student not found"]);
-    }
-
-    return student;
-  }
-
   async listEnrollments(query: EnrollmentListQuery, currentUserId: string): Promise<{ enrollments: EnrollmentResponse[]; pagination: { page: number; limit: number; total: number; totalPages: number } }> {
     const { role, id: requestorId } = await this.verifyAuthorized(currentUserId);
 
-    const { page, limit, studentId, classId, status, isActive, search } = query;
+    const { page, limit, studentId, classId, courseId, status, isActive, search } = query;
 
     const filter: Record<string, unknown> = { isActive: true };
 
@@ -165,14 +152,27 @@ export class EnrollmentService {
         }
         filter.classId = classId;
       }
+      if (courseId) {
+        if (role === UserRole.TEACHER) {
+          const teacherClasses = await enrollmentRepository.findClassIdsByTeacher(requestorId);
+          filter.classId = { $in: teacherClasses };
+          filter.courseId = courseId;
+        } else {
+          filter.courseId = courseId;
+        }
+      }
     }
 
     if (status) {
       filter.status = status;
     }
 
-    if (isActive !== undefined) {
-      filter.isActive = isActive;
+    if (role === UserRole.ADMIN) {
+      if (isActive !== undefined) {
+        filter.isActive = isActive;
+      }
+    } else {
+      filter.isActive = true;
     }
 
     if (search) {
@@ -270,6 +270,9 @@ export class EnrollmentService {
       logger.info(`Enrollment created: student=${data.studentId}, class=${data.classId} (by: ${currentUserId})`);
       return toEnrollmentResponse(created);
     } catch (error) {
+      if (error && typeof error === "object" && "code" in error && (error as { code: number }).code === 11000) {
+        throw new AppError(ERROR_MESSAGES.ENROLLMENT_EXISTS, STATUS_CODES.CONFLICT, ["Student is already enrolled in this class"]);
+      }
       const mongoError = handleMongoError(error);
       if (mongoError) {
         throw mongoError;
@@ -310,6 +313,9 @@ export class EnrollmentService {
       logger.info(`Enrollment updated: ${id} (by: ${currentUserId})`);
       return toEnrollmentResponse(updated);
     } catch (error) {
+      if (error && typeof error === "object" && "code" in error && (error as { code: number }).code === 11000) {
+        throw new AppError(ERROR_MESSAGES.ENROLLMENT_EXISTS, STATUS_CODES.CONFLICT, ["Student is already enrolled in this class"]);
+      }
       const mongoError = handleMongoError(error);
       if (mongoError) {
         throw mongoError;

@@ -47,7 +47,7 @@ const enrollmentSchema = new Schema<IEnrollment>(
   },
 );
 
-enrollmentSchema.index({ studentId: 1, classId: 1 }, { unique: true });
+enrollmentSchema.index({ studentId: 1, classId: 1 }, { unique: true, partialFilterExpression: { isActive: true } });
 enrollmentSchema.index({ studentId: 1, isActive: 1 });
 enrollmentSchema.index({ classId: 1, isActive: 1 });
 enrollmentSchema.index({ courseId: 1, isActive: 1 });

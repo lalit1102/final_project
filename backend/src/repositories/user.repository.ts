@@ -1,5 +1,5 @@
 import User from "@/models/user.model";
-import { IUser } from "@/types/user.types";
+import { IUser, UserRole } from "@/types/user.types";
 import { UpdateQuery } from "mongoose";
 
 export class UserRepository {
@@ -21,7 +21,7 @@ export class UserRepository {
 
   async findStudentsByParentId(parentId: string): Promise<IUser[]> {
     return User.find({
-      role: "student",
+      role: UserRole.STUDENT,
       isActive: true,
       parentIds: parentId,
     }).select("-password -refreshToken");

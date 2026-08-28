@@ -6,7 +6,7 @@ export const enrollmentIdParamSchema = z.object({
   id: objectIdSchema,
 });
 
-export const statusEnum = z.enum(Object.values(EnrollmentStatus));
+export const statusEnum = z.nativeEnum(EnrollmentStatus);
 
 export const createEnrollmentSchema = z
   .object({
@@ -33,6 +33,7 @@ export const patchEnrollmentSchema = z
 export const enrollmentListSchema = paginationSchema.extend({
   studentId: objectIdSchema.optional(),
   classId: objectIdSchema.optional(),
+  courseId: objectIdSchema.optional(),
   status: statusEnum.optional(),
   isActive: z
     .preprocess(
