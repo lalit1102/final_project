@@ -12,4 +12,8 @@ export const ERROR_MESSAGES = {
   ACCOUNT_UNVERIFIED: 'Please verify your email address.',
   RATE_LIMIT_EXCEEDED: 'Too many requests. Please try again later.',
   CSRF_INVALID: 'CSRF validation failed.',
+  SUBJECT_EXISTS: 'A subject with this code or name already exists.',
+  SUBJECT_NOT_FOUND: 'Subject not found.',
+  USER_NOT_FOUND: 'User not found.',
+  INVALID_TEACHER: 'Invalid teacher assignment.',
 } as const;
