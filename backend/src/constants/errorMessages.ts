@@ -11,4 +11,5 @@ export const ERROR_MESSAGES = {
   ACCOUNT_LOCKED: 'Account is locked due to too many failed login attempts.',
   ACCOUNT_UNVERIFIED: 'Please verify your email address.',
   RATE_LIMIT_EXCEEDED: 'Too many requests. Please try again later.',
+  CSRF_INVALID: 'CSRF validation failed.',
 } as const;

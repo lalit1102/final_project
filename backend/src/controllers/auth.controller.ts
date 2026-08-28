@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authService } from "@/services/auth.service";
-import { registerSchema, loginSchema } from "@/validations/auth.validation";
+import { registerSchema, loginSchema, forgotPasswordSchema } from "@/validations/auth.validation";
 import { sendResponse } from "@/utils/apiResponse";
-import { AppError } from "@/utils/AppError";
+import { AppError, handleMongoError } from "@/utils/AppError";
 import { STATUS_CODES } from "@/constants/statusCodes";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { logger } from "@/utils/logger";
 import { z } from "zod";
+import { setCsrfCookie, clearCsrfCookie } from "@/lib/csrf";
+import { generateCsrfToken } from "@/lib/csrf.server";
 
 export class AuthController {
   
@@ -26,11 +28,17 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60, // 7 days
       path: "/",
     });
+
+    // Issue a CSRF token alongside the auth cookies. This token is stored
+    // in a readable (non-HTTP-only) cookie so the frontend can read it and
+    // include it in the "x-csrf-token" header for state-changing requests.
+    setCsrfCookie(res, generateCsrfToken());
   }
 
   private clearCookies(res: NextResponse) {
     res.cookies.delete("accessToken");
     res.cookies.delete("refreshToken");
+    clearCsrfCookie(res);
   }
 
   async register(req: NextRequest) {
@@ -115,8 +123,6 @@ export class AuthController {
 
   async changePassword(req: NextRequest) {
     try {
-      console.log("Headers x-user-id:", req.headers.get("x-user-id"));
-console.log("Headers x-user-role:", req.headers.get("x-user-role"));
       const userId = req.headers.get("x-user-id");
       if (!userId) throw new AppError(ERROR_MESSAGES.UNAUTHORIZED, STATUS_CODES.UNAUTHORIZED);
 
@@ -139,9 +145,9 @@ console.log("Headers x-user-role:", req.headers.get("x-user-role"));
   async forgotPassword(req: NextRequest) {
     try {
       const body = await req.json();
-      if (!body.email) throw new AppError("Email is required", STATUS_CODES.BAD_REQUEST);
+      const validatedData = forgotPasswordSchema.parse(body);
 
-      await authService.forgotPassword(body.email);
+      await authService.forgotPassword(validatedData.email);
 
       return NextResponse.json(
         sendResponse(null, "If an account exists with that email, a reset link will be sent."),
@@ -227,6 +233,13 @@ console.log("Headers x-user-role:", req.headers.get("x-user-role"));
       return NextResponse.json(
         sendResponse(null, "Validation Error", error.issues.map((e: z.ZodIssue) => e.message)),
         { status: STATUS_CODES.BAD_REQUEST }
+      );
+    }
+    const mongoError = handleMongoError(error);
+    if (mongoError) {
+      return NextResponse.json(
+        sendResponse(null, mongoError.message, mongoError.errors),
+        { status: mongoError.statusCode }
       );
     }
     if (error instanceof AppError) {

@@ -5,10 +5,18 @@ import { UserRole } from "./types/user.types";
 import { STATUS_CODES } from "./constants/statusCodes";
 import { ERROR_MESSAGES } from "./constants/errorMessages";
 import { env } from "./config/env";
+import { validateCsrf } from "./lib/csrf";
 
-const protectedRoutes = ["/api/auth/change-password", "/api/auth/profile", "/api/auth/logout"]; 
+const protectedRoutes = ["/api/auth/change-password", "/api/auth/profile", "/api/auth/logout"];
 const adminRoutes = ["/api/admin"];
 const allowedOrigin = env.FRONTEND_ORIGIN || "http://localhost:3000";
+
+function getAllowedOrigin(requestOrigin: string | null): string {
+  if (requestOrigin === allowedOrigin) {
+    return allowedOrigin;
+  }
+  return "";
+}
 
 function matchesRoute(pathname: string, routes: readonly string[]): boolean {
   return routes.some((route) => pathname === route || pathname.startsWith(`${route}/`));
@@ -26,34 +34,34 @@ function createJsonError(statusCode: number, message: string, errors: string[], 
     { status: statusCode }
   );
 
+  applyCorsHeaders(response, origin);
+  return response;
+}
+
+function applyCorsHeaders(response: NextResponse, origin: string) {
+  if (!origin) return;
   response.headers.set("Access-Control-Allow-Origin", origin);
   response.headers.set("Access-Control-Allow-Credentials", "true");
   response.headers.set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
-  response.headers.set("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Requested-With");
-
-  return response;
+  response.headers.set("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Requested-With,x-csrf-token");
 }
+
+export const CSRF_STATE_CHANGING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const isProtected = matchesRoute(pathname, protectedRoutes);
   const isAdmin = matchesRoute(pathname, adminRoutes);
-  const origin = req.headers.get("origin") ?? allowedOrigin;
+  const origin = getAllowedOrigin(req.headers.get("origin"));
 
   if (req.method === "OPTIONS") {
     const response = new NextResponse(null, { status: 204 });
-    response.headers.set("Access-Control-Allow-Origin", origin);
-    response.headers.set("Access-Control-Allow-Credentials", "true");
-    response.headers.set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
-    response.headers.set("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Requested-With");
+    applyCorsHeaders(response, origin);
     return response;
   }
 
   const response = NextResponse.next();
-  response.headers.set("Access-Control-Allow-Origin", origin);
-  response.headers.set("Access-Control-Allow-Credentials", "true");
-  response.headers.set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
-  response.headers.set("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Requested-With");
+  applyCorsHeaders(response, origin);
 
   if (!isProtected && !isAdmin) {
     return response;
@@ -72,6 +80,17 @@ export async function middleware(req: NextRequest) {
       return createJsonError(STATUS_CODES.FORBIDDEN, ERROR_MESSAGES.FORBIDDEN, ["Insufficient permissions"], origin);
     }
 
+    // CSRF validation: applied after authentication and authorization, only
+    // for state-changing methods on authenticated routes. Safe methods
+    // (GET, HEAD, OPTIONS) are exempt.
+    if (CSRF_STATE_CHANGING_METHODS.has(req.method)) {
+      const csrfResult = validateCsrf(req);
+      if (!csrfResult.valid) {
+        applyCorsHeaders(csrfResult.response, origin);
+        return csrfResult.response;
+      }
+    }
+
     const requestHeaders = new Headers(req.headers);
     requestHeaders.set("x-user-id", decoded.userId);
     requestHeaders.set("x-user-role", decoded.role);
@@ -82,10 +101,7 @@ export async function middleware(req: NextRequest) {
       },
     });
 
-    authResponse.headers.set("Access-Control-Allow-Origin", origin);
-    authResponse.headers.set("Access-Control-Allow-Credentials", "true");
-    authResponse.headers.set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
-    authResponse.headers.set("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Requested-With");
+    applyCorsHeaders(authResponse, origin);
 
     return authResponse;
   } catch {

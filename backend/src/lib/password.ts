@@ -16,15 +16,5 @@ export async function comparePassword(
   password: string,
   hashedPassword: string
 ): Promise<boolean> {
-  if (process.env.NODE_ENV !== "production") {
-    console.log("[comparePassword] plain password:", password);
-  }
-
-  const isMatch = await bcrypt.compare(password, hashedPassword);
-
-  if (process.env.NODE_ENV !== "production") {
-    console.log("[comparePassword] comparison result:", isMatch);
-  }
-
-  return isMatch;
+  return bcrypt.compare(password, hashedPassword);
 }

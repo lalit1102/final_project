@@ -1,4 +1,5 @@
 import { StatusCode } from '../constants/statusCodes';
+import { ERROR_MESSAGES } from '../constants/errorMessages';
 
 export class AppError extends Error {
   public readonly statusCode: StatusCode;
@@ -21,4 +22,19 @@ export class AppError extends Error {
 
     Error.captureStackTrace(this, this.constructor);
   }
+}
+
+/**
+ * Converts Mongoose/MongoDB errors into AppError instances.
+ * Handles duplicate-key errors (code 11000) as 409 Conflict.
+ */
+export function handleMongoError(error: unknown): AppError | null {
+  if (error && typeof error === 'object' && 'code' in error && (error as { code: number }).code === 11000) {
+    return new AppError(
+      ERROR_MESSAGES.USER_EXISTS,
+      409 as StatusCode,
+      ['A user with this email already exists.'],
+    );
+  }
+  return null;
 }

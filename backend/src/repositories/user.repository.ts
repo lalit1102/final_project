@@ -11,6 +11,10 @@ export class UserRepository {
     return User.findById(id).select("+password");
   }
 
+  async findByIdSafe(id: string): Promise<IUser | null> {
+    return User.findById(id).select("-password -refreshToken");
+  }
+
   async findByGoogleId(googleId: string): Promise<IUser | null> {
     return User.findOne({ providerId: googleId });
   }
@@ -20,7 +24,7 @@ export class UserRepository {
   }
 
   async update(id: string, updateData: UpdateQuery<IUser>): Promise<IUser | null> {
-    return User.findByIdAndUpdate(id, updateData, { new: true });
+    return User.findByIdAndUpdate(id, updateData, { new: true }).select("-password -refreshToken");
   }
 
   async updateLastLogin(id: string): Promise<void> {
@@ -31,9 +35,36 @@ export class UserRepository {
     });
   }
 
+  async softDelete(id: string): Promise<IUser | null> {
+    return User.findByIdAndUpdate(id, { isActive: false }, { new: true }).select("-password -refreshToken");
+  }
+
   async exists(email: string): Promise<boolean> {
     const user = await User.exists({ email });
     return !!user;
+  }
+
+  async findAllPaginated(
+    filter: Record<string, unknown>,
+    page: number,
+    limit: number,
+    sortBy: string,
+    sortOrder: 1 | -1,
+  ): Promise<{ users: IUser[]; total: number }> {
+    const skip = (page - 1) * limit;
+    const sort = { [sortBy]: sortOrder };
+
+    const [users, total] = await Promise.all([
+      User.find(filter)
+        .select("-password -refreshToken")
+        .sort(sort)
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      User.countDocuments(filter),
+    ]);
+
+    return { users: users as IUser[], total };
   }
   
   async incrementLoginAttempts(email: string, maxAttempts: number, lockTimeMs: number): Promise<void> {
