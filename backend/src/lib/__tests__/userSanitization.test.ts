@@ -21,11 +21,13 @@ function makeMockUser(overrides: Record<string, unknown> = {}): Record<string, u
     loginAttempts: 0,
     lockUntil: null,
     passwordChangedAt: new Date("2025-01-14T10:00:00Z"),
-    createdAt: new Date("2025-01-01T00:00:00Z"),
-    updatedAt: new Date("2025-01-15T10:00:00Z"),
-    ...overrides,
-  };
-}
+     studentId: "STU-2025-001",
+     parentIds: [],
+     createdAt: new Date("2025-01-01T00:00:00Z"),
+     updatedAt: new Date("2025-01-15T10:00:00Z"),
+     ...overrides,
+   };
+ }
 
 describe("sanitizeUser", () => {
   it("should return null for null input", () => {
@@ -111,5 +113,36 @@ describe("sanitizeUser", () => {
     const user = makeMockUser({ lastLogin: null }) as unknown as IUser;
     const result = sanitizeUser(user);
     assert.equal(result?.lastLogin, null);
+  });
+
+  it("should include studentId as null when not set", () => {
+    const user = makeMockUser({ studentId: null }) as unknown as IUser;
+    const result = sanitizeUser(user);
+    assert.equal(result?.studentId, null);
+  });
+
+  it("should include studentId when set", () => {
+    const user = makeMockUser({ studentId: "STU-2025-001" }) as unknown as IUser;
+    const result = sanitizeUser(user);
+    assert.equal(result?.studentId, "STU-2025-001");
+  });
+
+  it("should include parentIds as empty array when not set", () => {
+    const user = makeMockUser({ parentIds: [] }) as unknown as IUser;
+    const result = sanitizeUser(user);
+    assert.deepEqual(result?.parentIds, []);
+  });
+
+  it("should include parentIds when set", () => {
+    const user = makeMockUser({
+      parentIds: [
+        { toString: () => "507f1f77bcf86cd799439011" },
+        { toString: () => "507f1f77bcf86cd799439014" },
+      ],
+    }) as unknown as IUser;
+    const result = sanitizeUser(user);
+    assert.equal(result?.parentIds.length, 2);
+    assert.equal(result?.parentIds[0], "507f1f77bcf86cd799439011");
+    assert.equal(result?.parentIds[1], "507f1f77bcf86cd799439014");
   });
 });

@@ -143,6 +143,73 @@ describe("admin.validation schemas", () => {
       const result = updateUserSchema.safeParse({});
       assert.equal(result.success, true);
     });
+
+    it("should accept studentId as a string", () => {
+      const result = updateUserSchema.safeParse({ studentId: "STU-2025-001" });
+      assert.equal(result.success, true);
+      if (result.success) assert.equal(result.data.studentId, "STU-2025-001");
+    });
+
+    it("should accept studentId as null", () => {
+      const result = updateUserSchema.safeParse({ studentId: null });
+      assert.equal(result.success, true);
+      if (result.success) assert.equal(result.data.studentId, null);
+    });
+
+    it("should reject studentId as a number", () => {
+      const result = updateUserSchema.safeParse({ studentId: 12345 });
+      assert.equal(result.success, false);
+    });
+
+    it("should reject studentId exceeding max length", () => {
+      const result = updateUserSchema.safeParse({ studentId: "x".repeat(101) });
+      assert.equal(result.success, false);
+    });
+
+    it("should accept studentId with exactly 100 chars", () => {
+      const result = updateUserSchema.safeParse({ studentId: "x".repeat(100) });
+      assert.equal(result.success, true);
+    });
+
+    it("should trim whitespace from studentId", () => {
+      const result = updateUserSchema.safeParse({ studentId: "  STU-2025-001  " });
+      assert.equal(result.success, true);
+      if (result.success) assert.equal(result.data.studentId, "STU-2025-001");
+    });
+
+    it("should accept parentIds as an array of ObjectIds", () => {
+      const result = updateUserSchema.safeParse({
+        parentIds: ["507f1f77bcf86cd799439011", "507f1f77bcf86cd799439014"],
+      });
+      assert.equal(result.success, true);
+    });
+
+    it("should accept parentIds as an empty array", () => {
+      const result = updateUserSchema.safeParse({ parentIds: [] });
+      assert.equal(result.success, true);
+      if (result.success) assert.deepEqual(result.data.parentIds, []);
+    });
+
+    it("should accept parentIds as null", () => {
+      const result = updateUserSchema.safeParse({ parentIds: null });
+      assert.equal(result.success, true);
+    });
+
+    it("should reject parentIds containing non-ObjectId strings", () => {
+      const result = updateUserSchema.safeParse({ parentIds: ["not-a-valid-id"] });
+      assert.equal(result.success, false);
+    });
+
+    it("should reject parentIds with more than 10 entries", () => {
+      const ids = Array.from({ length: 11 }, (_, i) => `507f1f77bcf86cd79943901${i}`);
+      const result = updateUserSchema.safeParse({ parentIds: ids });
+      assert.equal(result.success, false);
+    });
+
+    it("should reject parentIds as a non-array value", () => {
+      const result = updateUserSchema.safeParse({ parentIds: "not-an-array" });
+      assert.equal(result.success, false);
+    });
   });
 
   describe("updateUserStatusSchema", () => {

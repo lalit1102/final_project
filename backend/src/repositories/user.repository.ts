@@ -15,6 +15,10 @@ export class UserRepository {
     return User.findById(id).select("-password -refreshToken");
   }
 
+  async findByIds(ids: string[]): Promise<IUser[]> {
+    return User.find({ _id: { $in: ids } }).select("-password -refreshToken");
+  }
+
   async findByGoogleId(googleId: string): Promise<IUser | null> {
     return User.findOne({ providerId: googleId });
   }

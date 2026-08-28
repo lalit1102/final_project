@@ -48,7 +48,7 @@ const userSchema = new Schema<IUser>(
       enum: Object.values(UserRole),
       default: UserRole.STUDENT,
     },
-    
+
     permissions: {
       type: [String],
       default: [],
@@ -63,7 +63,7 @@ const userSchema = new Schema<IUser>(
       type: Boolean,
       default: false,
     },
-    
+
     refreshToken: {
       type: String,
       select: false,
@@ -74,20 +74,32 @@ const userSchema = new Schema<IUser>(
       type: Date,
       default: null,
     },
-    
+
     loginAttempts: {
       type: Number,
       default: 0,
     },
-    
+
     lockUntil: {
       type: Date,
       default: null,
     },
-    
+
     passwordChangedAt: {
       type: Date,
       default: null,
+    },
+
+    studentId: {
+      type: String,
+      unique: true,
+      sparse: true,
+      default: null,
+    },
+
+    parentIds: {
+      type: [{ type: Schema.Types.ObjectId, ref: "User" }],
+      default: [],
     },
   },
   {
@@ -96,7 +108,6 @@ const userSchema = new Schema<IUser>(
   }
 );
 
-// Indexes for performance
 userSchema.index({ email: 1 });
 userSchema.index({ providerId: 1 });
 userSchema.index({ refreshToken: 1 });

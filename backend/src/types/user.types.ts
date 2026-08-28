@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import { Document, Types } from "mongoose";
 
 export enum UserRole {
   ADMIN = "ADMIN",
@@ -28,6 +28,8 @@ export interface IUser extends Document {
   loginAttempts: number;
   lockUntil?: Date | null;
   passwordChangedAt?: Date | null;
+  studentId?: string | null;
+  parentIds?: Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }

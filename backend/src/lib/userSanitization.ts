@@ -11,6 +11,8 @@ export interface SanitizedUser {
   isActive: boolean;
   isVerified: boolean;
   lastLogin?: Date | null;
+  studentId: string | null;
+  parentIds: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -43,6 +45,8 @@ export function sanitizeUser(user: IUser | null): SanitizedUser | null {
     isActive: user.isActive,
     isVerified: user.isVerified,
     lastLogin: user.lastLogin ?? null,
+    studentId: user.studentId ?? null,
+    parentIds: (user.parentIds ?? []).map((id) => id.toString()),
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };

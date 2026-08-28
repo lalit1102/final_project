@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { UserRole } from "@/types/user.types";
+import { objectIdSchema } from "./objectId";
 
 const objectIdRegex = /^[0-9a-fA-F]{24}$/;
 
@@ -43,6 +44,19 @@ export const updateUserSchema = z.object({
     .optional(),
   role: z.nativeEnum(UserRole).optional(),
   isActive: z.boolean().optional(),
+  studentId: z
+    .string()
+    .trim()
+    .max(100)
+    .nullable()
+    .optional()
+    .describe("Unique student identifier; only ADMIN may set this on STUDENT users"),
+  parentIds: z
+    .array(objectIdSchema)
+    .max(10, "A student can have at most 10 parents")
+    .nullable()
+    .optional()
+    .describe("Array of parent User ObjectIds; only ADMIN may set this on STUDENT users"),
 }).strict();
 
 export const updateUserStatusSchema = z.object({

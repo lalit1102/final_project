@@ -20,4 +20,8 @@ export const ERROR_MESSAGES = {
   CLASS_NOT_FOUND: 'Class not found.',
   USER_NOT_FOUND: 'User not found.',
   INVALID_TEACHER: 'Invalid teacher assignment.',
+  INVALID_PARENT: 'Referenced user is not a PARENT.',
+  PARENT_NOT_FOUND: 'One or more parent users were not found.',
+  STUDENT_ID_NOT_ALLOWED: 'studentId can only be set on users with role STUDENT.',
+  PARENT_IDS_NOT_ALLOWED: 'parentIds can only set on users with role STUDENT.',
 } as const;

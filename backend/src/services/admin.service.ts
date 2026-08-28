@@ -116,6 +116,50 @@ export class AdminService {
       updates.isActive = data.isActive;
     }
 
+    if (data.studentId !== undefined) {
+      if (user.role !== UserRole.STUDENT) {
+        throw new AppError(ERROR_MESSAGES.STUDENT_ID_NOT_ALLOWED, STATUS_CODES.FORBIDDEN, [
+          "studentId can only be set on users with role STUDENT",
+        ]);
+      }
+      updates.studentId = data.studentId;
+    }
+
+    if (data.parentIds !== undefined && data.parentIds !== null) {
+      if (user.role !== UserRole.STUDENT) {
+        throw new AppError(ERROR_MESSAGES.PARENT_IDS_NOT_ALLOWED, STATUS_CODES.FORBIDDEN, [
+          "parentIds can only be set on users with role STUDENT",
+        ]);
+      }
+      if (data.parentIds.length > 0) {
+        const parents = await userRepository.findByIds(data.parentIds);
+        const foundIds = new Set(parents.map((p) => p._id.toString()));
+        const missing = data.parentIds.filter((id) => !foundIds.has(id));
+        if (missing.length > 0) {
+          throw new AppError(ERROR_MESSAGES.PARENT_NOT_FOUND, STATUS_CODES.NOT_FOUND, [
+            `Parent user(s) not found: ${missing.join(", ")}`,
+          ]);
+        }
+        const nonParents = parents.filter((p) => p.role !== UserRole.PARENT);
+        if (nonParents.length > 0) {
+          const invalidRoles = nonParents.map((p) => `${p.email} (${p.role})`);
+          throw new AppError(ERROR_MESSAGES.INVALID_PARENT, STATUS_CODES.CONFLICT, [
+            `All parentIds must reference users with role PARENT. Invalid: ${invalidRoles.join(", ")}`,
+          ]);
+        }
+        updates.parentIds = parents.map((p) => p._id);
+      } else {
+        updates.parentIds = [];
+      }
+    } else if (data.parentIds === null) {
+      if (user.role !== UserRole.STUDENT) {
+        throw new AppError(ERROR_MESSAGES.PARENT_IDS_NOT_ALLOWED, STATUS_CODES.FORBIDDEN, [
+          "parentIds can only be set on users with role STUDENT",
+        ]);
+      }
+      updates.parentIds = [];
+    }
+
     if (Object.keys(updates).length === 0) {
       return sanitizeUser(user)!;
     }

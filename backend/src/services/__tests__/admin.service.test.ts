@@ -50,12 +50,41 @@ const mockUsers: Partial<IUser>[] = [
     createdAt: new Date("2025-01-03T00:00:00Z"),
     updatedAt: new Date("2025-01-03T00:00:00Z"),
   },
+  {
+    _id: "507f1f77bcf86cd799439014" as unknown as IUser["_id"],
+    name: "Parent One",
+    email: "parent1@example.com",
+    provider: AuthProvider.LOCAL,
+    providerId: null,
+    avatar: null,
+    role: UserRole.PARENT,
+    isActive: true,
+    isVerified: true,
+    lastLogin: null,
+    createdAt: new Date("2025-01-04T00:00:00Z"),
+    updatedAt: new Date("2025-01-04T00:00:00Z"),
+  },
+  {
+    _id: "507f1f77bcf86cd799439015" as unknown as IUser["_id"],
+    name: "Parent Two",
+    email: "parent2@example.com",
+    provider: AuthProvider.LOCAL,
+    providerId: null,
+    avatar: null,
+    role: UserRole.PARENT,
+    isActive: true,
+    isVerified: true,
+    lastLogin: null,
+    createdAt: new Date("2025-01-05T00:00:00Z"),
+    updatedAt: new Date("2025-01-05T00:00:00Z"),
+  },
 ];
 
 const defaultMock = {
   findAllPaginated: async () => ({ users: mockUsers, total: mockUsers.length }),
   findByIdSafe: async (_id: string) => mockUsers.find((u) => u._id?.toString() === _id) ?? null,
   findById: async (_id: string) => mockUsers.find((u) => u._id?.toString() === _id) ?? null,
+  findByIds: async (_ids: string[]) => mockUsers.filter((u) => _ids.includes(u._id?.toString() ?? "")),
   findByEmail: async (email: string) => mockUsers.find((u) => u.email === email) ?? null,
   update: async () => mockUsers[0],
   softDelete: async (_id: string) => {
@@ -76,6 +105,7 @@ function installMockRepo(): void {
   repo.findAllPaginated = source.findAllPaginated;
   repo.findByIdSafe = source.findByIdSafe;
   repo.findById = source.findById;
+  repo.findByIds = source.findByIds;
   repo.findByEmail = source.findByEmail;
   repo.update = source.update;
   repo.softDelete = source.softDelete;
@@ -94,11 +124,11 @@ describe("AdminService", () => {
         limit: 20,
       });
 
-      assert.equal(result.pagination.total, 3);
+      assert.equal(result.pagination.total, 5);
       assert.equal(result.pagination.page, 1);
       assert.equal(result.pagination.limit, 20);
       assert.equal(result.pagination.totalPages, 1);
-      assert.equal(result.users.length, 3);
+      assert.equal(result.users.length, 5);
     });
 
     it("should not expose password or refreshToken fields", async () => {
@@ -334,6 +364,255 @@ describe("AdminService", () => {
         assert.ok(error instanceof AppError);
         assert.equal(error.statusCode, STATUS_CODES.FORBIDDEN);
       }
+    });
+
+    it("should set studentId on a STUDENT user", async () => {
+      const student = { ...mockUsers[2] } as unknown as IUser;
+      const updated = { ...student, studentId: "STU-2025-001" } as unknown as IUser;
+      mockOverrides = {
+        findById: async () => student,
+        update: async () => updated,
+      };
+      installMockRepo();
+
+      const result = await adminService.updateUser(
+        "507f1f77bcf86cd799439013",
+        { studentId: "STU-2025-001" },
+        "507f1f77bcf86cd799439011",
+      );
+
+      assert.equal(result.studentId, "STU-2025-001");
+    });
+
+    it("should set parentIds on a STUDENT user referencing valid PARENT users", async () => {
+      const student = { ...mockUsers[2] } as unknown as IUser;
+      const parent1 = { ...mockUsers[3] } as unknown as IUser;
+      const parent2 = { ...mockUsers[4] } as unknown as IUser;
+      const updated = {
+        ...student,
+        parentIds: [
+          parent1._id,
+          parent2._id,
+        ],
+      } as unknown as IUser;
+      mockOverrides = {
+        findById: async () => student,
+        findByIds: async (ids: string[]) =>
+          mockUsers.filter((u) => ids.includes(u._id?.toString() ?? "")) as IUser[],
+        update: async () => updated,
+      };
+      installMockRepo();
+
+      const result = await adminService.updateUser(
+        "507f1f77bcf86cd799439013",
+        { parentIds: ["507f1f77bcf86cd799439014", "507f1f77bcf86cd799439015"] },
+        "507f1f77bcf86cd799439011",
+      );
+
+      assert.equal(result.parentIds.length, 2);
+      assert.equal(result.parentIds[0], "507f1f77bcf86cd799439014");
+    });
+
+    it("should reject studentId on a non-STUDENT target (TEACHER)", async () => {
+      mockOverrides = {
+        findById: async () => mockUsers[1] as IUser,
+      };
+      installMockRepo();
+
+      try {
+        await adminService.updateUser(
+          "507f1f77bcf86cd799439012",
+          { studentId: "STU-2025-999" },
+          "507f1f77bcf86cd799439011",
+        );
+        assert.fail("Should have thrown");
+      } catch (error) {
+        assert.ok(error instanceof AppError);
+        assert.equal(error.statusCode, STATUS_CODES.FORBIDDEN);
+        assert.ok(error.message.includes("studentId"));
+      }
+    });
+
+    it("should reject parentIds on a non-STUDENT target (TEACHER)", async () => {
+      mockOverrides = {
+        findById: async () => mockUsers[1] as IUser,
+      };
+      installMockRepo();
+
+      try {
+        await adminService.updateUser(
+          "507f1f77bcf86cd799439012",
+          { parentIds: ["507f1f77bcf86cd799439014"] },
+          "507f1f77bcf86cd799439011",
+        );
+        assert.fail("Should have thrown");
+      } catch (error) {
+        assert.ok(error instanceof AppError);
+        assert.equal(error.statusCode, STATUS_CODES.FORBIDDEN);
+        assert.ok(error.message.includes("parentIds"));
+      }
+    });
+
+    it("should reject studentId on a non-STUDENT target (ADMIN)", async () => {
+      mockOverrides = {
+        findById: async () => mockUsers[0] as IUser,
+      };
+      installMockRepo();
+
+      try {
+        await adminService.updateUser(
+          "507f1f77bcf86cd799439011",
+          { studentId: "STU-2025-999" },
+          "507f1f77bcf86cd799439011",
+        );
+        assert.fail("Should have thrown");
+      } catch (error) {
+        assert.ok(error instanceof AppError);
+        assert.equal(error.statusCode, STATUS_CODES.FORBIDDEN);
+      }
+    });
+
+    it("should reject parentIds on a non-STUDENT target (ADMIN)", async () => {
+      mockOverrides = {
+        findById: async () => mockUsers[0] as IUser,
+      };
+      installMockRepo();
+
+      try {
+        await adminService.updateUser(
+          "507f1f77bcf86cd799439011",
+          { parentIds: ["507f1f77bcf86cd799439014"] },
+          "507f1f77bcf86cd799439011",
+        );
+        assert.fail("Should have thrown");
+      } catch (error) {
+        assert.ok(error instanceof AppError);
+        assert.equal(error.statusCode, STATUS_CODES.FORBIDDEN);
+      }
+    });
+
+    it("should reject parentIds referencing a nonexistent User", async () => {
+      const student = { ...mockUsers[2] } as unknown as IUser;
+      mockOverrides = {
+        findById: async () => student,
+        findByIds: async (_ids: string[]) => [],
+      };
+      installMockRepo();
+
+      try {
+        await adminService.updateUser(
+          "507f1f77bcf86cd799439013",
+          { parentIds: ["507f1f77bcf86cd799439099"] },
+          "507f1f77bcf86cd799439011",
+        );
+        assert.fail("Should have thrown");
+      } catch (error) {
+        assert.ok(error instanceof AppError);
+        assert.equal(error.statusCode, STATUS_CODES.NOT_FOUND);
+      }
+    });
+
+    it("should reject parentIds referencing a non-PARENT User (TEACHER)", async () => {
+      const student = { ...mockUsers[2] } as unknown as IUser;
+      mockOverrides = {
+        findById: async () => student,
+        findByIds: async (_ids: string[]) => [mockUsers[1] as IUser],
+      };
+      installMockRepo();
+
+      try {
+        await adminService.updateUser(
+          "507f1f77bcf86cd799439013",
+          { parentIds: ["507f1f77bcf86cd799439012"] },
+          "507f1f77bcf86cd799439011",
+        );
+        assert.fail("Should have thrown");
+      } catch (error) {
+        assert.ok(error instanceof AppError);
+        assert.equal(error.statusCode, STATUS_CODES.CONFLICT);
+      }
+    });
+
+    it("should reject parentIds referencing a non-PARENT User (ADMIN)", async () => {
+      const student = { ...mockUsers[2] } as unknown as IUser;
+      mockOverrides = {
+        findById: async () => student,
+        findByIds: async (_ids: string[]) => [mockUsers[0] as IUser],
+      };
+      installMockRepo();
+
+      try {
+        await adminService.updateUser(
+          "507f1f77bcf86cd799439013",
+          { parentIds: ["507f1f77bcf86cd799439011"] },
+          "507f1f77bcf86cd799439011",
+        );
+        assert.fail("Should have thrown");
+      } catch (error) {
+        assert.ok(error instanceof AppError);
+        assert.equal(error.statusCode, STATUS_CODES.CONFLICT);
+      }
+    });
+
+    it("should allow setting studentId to null (clearing it)", async () => {
+      const student = { ...mockUsers[2], studentId: "STU-OLD" } as unknown as IUser;
+      const updated = { ...student, studentId: null } as unknown as IUser;
+      mockOverrides = {
+        findById: async () => student,
+        update: async () => updated,
+      };
+      installMockRepo();
+
+      const result = await adminService.updateUser(
+        "507f1f77bcf86cd799439013",
+        { studentId: null },
+        "507f1f77bcf86cd799439011",
+      );
+
+      assert.equal(result.studentId, null);
+    });
+
+    it("should allow setting parentIds to empty array (clearing parents)", async () => {
+      const student = { ...mockUsers[2], studentId: null, parentIds: [] } as unknown as IUser;
+      const updated = { ...student } as unknown as IUser;
+      mockOverrides = {
+        findById: async () => student,
+        update: async () => updated,
+      };
+      installMockRepo();
+
+      const result = await adminService.updateUser(
+        "507f1f77bcf86cd799439013",
+        { parentIds: [] },
+        "507f1f77bcf86cd799439011",
+      );
+
+      assert.equal(result.parentIds.length, 0);
+    });
+
+    it("should include studentId and parentIds in sanitized response", async () => {
+      const student = {
+        ...mockUsers[2],
+        studentId: "STU-2025-001",
+        parentIds: [
+          { toString: () => "507f1f77bcf86cd799439014" } as unknown as IUser["_id"],
+        ],
+      } as unknown as IUser;
+      mockOverrides = {
+        findById: async () => student,
+        update: async () => student,
+      };
+      installMockRepo();
+
+      const result = await adminService.updateUser(
+        "507f1f77bcf86cd799439013",
+        { name: "Updated Name" },
+        "507f1f77bcf86cd799439011",
+      );
+
+      assert.equal(result.studentId, "STU-2025-001");
+      assert.equal(result.parentIds.length, 1);
+      assert.equal(result.parentIds[0], "507f1f77bcf86cd799439014");
     });
   });
 
