@@ -14,6 +14,8 @@ export const ERROR_MESSAGES = {
   CSRF_INVALID: 'CSRF validation failed.',
   SUBJECT_EXISTS: 'A subject with this code or name already exists.',
   SUBJECT_NOT_FOUND: 'Subject not found.',
+  COURSE_EXISTS: 'A course with this code already exists.',
+  COURSE_NOT_FOUND: 'Course not found.',
   USER_NOT_FOUND: 'User not found.',
   INVALID_TEACHER: 'Invalid teacher assignment.',
 } as const;
