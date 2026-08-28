@@ -44,6 +44,11 @@ export class ClassRepository {
       .limit(limit)
       .lean();
   }
+
+  async findActiveClassIdsByTeacher(teacherId: string): Promise<string[]> {
+    const classes = await Class.find({ teacherId, isActive: true }).select("_id").lean();
+    return classes.map((c) => c._id.toString());
+  }
 }
 
 export const classRepository = new ClassRepository();

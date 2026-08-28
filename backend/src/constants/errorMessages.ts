@@ -24,4 +24,8 @@ export const ERROR_MESSAGES = {
   PARENT_NOT_FOUND: 'One or more parent users were not found.',
   STUDENT_ID_NOT_ALLOWED: 'studentId can only be set on users with role STUDENT.',
   PARENT_IDS_NOT_ALLOWED: 'parentIds can only set on users with role STUDENT.',
+  ENROLLMENT_NOT_FOUND: 'Enrollment not found.',
+  ENROLLMENT_EXISTS: 'Student is already enrolled in this class.',
+  INVALID_STUDENT: 'Referenced user is not a STUDENT.',
+  CLASS_NOT_ENROLLED: 'Student is not enrolled in this class.',
 } as const;

@@ -19,6 +19,14 @@ export class UserRepository {
     return User.find({ _id: { $in: ids } }).select("-password -refreshToken");
   }
 
+  async findStudentsByParentId(parentId: string): Promise<IUser[]> {
+    return User.find({
+      role: "student",
+      isActive: true,
+      parentIds: parentId,
+    }).select("-password -refreshToken");
+  }
+
   async findByGoogleId(googleId: string): Promise<IUser | null> {
     return User.findOne({ providerId: googleId });
   }
