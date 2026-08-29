@@ -7,7 +7,7 @@ import { ERROR_MESSAGES } from "./constants/errorMessages";
 import { env } from "./config/env";
 import { validateCsrf } from "./lib/csrf";
 
-const protectedRoutes = ["/api/auth/change-password", "/api/auth/profile", "/api/auth/logout", "/api/subjects", "/api/courses", "/api/classes", "/api/enrollments", "/api/assignments", "/api/submissions"];
+const protectedRoutes = ["/api/auth/change-password", "/api/auth/profile", "/api/auth/logout", "/api/subjects", "/api/courses", "/api/classes", "/api/enrollments", "/api/assignments", "/api/submissions", "/api/grades"];
 const adminRoutes = ["/api/admin"];
 const allowedOrigin = env.FRONTEND_ORIGIN || "http://localhost:3000";
 
