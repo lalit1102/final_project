@@ -235,7 +235,7 @@ export class AuthController {
         { status: STATUS_CODES.BAD_REQUEST }
       );
     }
-    const mongoError = handleMongoError(error);
+    const mongoError = handleMongoError(error, ERROR_MESSAGES.USER_EXISTS);
     if (mongoError) {
       return NextResponse.json(
         sendResponse(null, mongoError.message, mongoError.errors),

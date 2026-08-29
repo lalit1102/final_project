@@ -33,7 +33,9 @@ export const ERROR_MESSAGES = {
    INVALID_DUE_DATE: 'Due date must be in the future.',
    SUBMISSION_NOT_FOUND: 'Submission not found.',
    SUBMISSION_EXISTS: 'A submission for this assignment already exists.',
-   GRADE_NOT_FOUND: 'Grade not found.',
-   GRADE_EXISTS: 'A grade for this student and assignment already exists.',
-   INVALID_SCORE: 'Score must be between 0 and the assignment\'s maximum points.',
+  GRADE_NOT_FOUND: 'Grade not found.',
+  GRADE_EXISTS: 'A grade for this student and assignment already exists.',
+  INVALID_SCORE: 'Score must be between 0 and the assignment\'s maximum points.',
+  DUPLICATE_RESOURCE: 'A resource with this value already exists.',
+  PAYLOAD_TOO_LARGE: 'Request body too large.',
 } as const;
