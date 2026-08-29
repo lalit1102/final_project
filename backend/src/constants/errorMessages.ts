@@ -31,4 +31,6 @@ export const ERROR_MESSAGES = {
    ASSIGNMENT_NOT_FOUND: 'Assignment not found.',
    ASSIGNMENT_EXISTS: 'An assignment with this title already exists for this class.',
    INVALID_DUE_DATE: 'Due date must be in the future.',
+   SUBMISSION_NOT_FOUND: 'Submission not found.',
+   SUBMISSION_EXISTS: 'A submission for this assignment already exists.',
 } as const;
