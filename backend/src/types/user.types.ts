@@ -1,4 +1,5 @@
 import { Document } from "mongoose";
+import { PermissionCode } from "./permission.types";
 
 export enum UserRole {
   ADMIN = "ADMIN",
@@ -20,7 +21,7 @@ export interface IUser extends Document {
   providerId?: string | null;
   avatar?: string | null;
   role: UserRole;
-  permissions: string[];
+  permissions: PermissionCode[];
   isActive: boolean;
   isVerified: boolean;
   refreshToken?: string | null;
