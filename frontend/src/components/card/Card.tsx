@@ -41,9 +41,10 @@ export default function Card({
   );
 
   if (shouldRenderSkeleton) {
+    const { role, content, ...cardRest } = rest as Record<string, unknown>;
     return (
       <AntCard
-        {...rest}
+        {...cardRest}
         className={className}
         style={resolvedStyle}
         title={headerTitle}
@@ -55,9 +56,11 @@ export default function Card({
     );
   }
 
+  const { role, content, ...cardRest } = rest as Record<string, unknown>;
+
   return (
     <AntCard
-      {...rest}
+      {...cardRest}
       className={className}
       style={resolvedStyle}
       title={headerTitle}

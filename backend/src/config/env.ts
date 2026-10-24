@@ -8,6 +8,7 @@ export const env = {
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || "",
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || "",
   REDIS_URL: process.env.REDIS_URL || "redis://localhost:6379",
+  FRONTEND_ORIGIN: process.env.FRONTEND_ORIGIN || "http://localhost:3000",
 };
 
 const missingVariables = [

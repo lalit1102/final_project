@@ -8,7 +8,8 @@ import jwt from "jsonwebtoken";
 import { env } from "@/config/env";
 import { JwtPayload } from "@/types/auth.types";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "@/lib/jwt";
-import { AuthProvider } from "@/types/user.types";
+import { AuthProvider, UserRole } from "@/types/user.types";
+import { getRolePermissions } from "@/lib/permissions";
 import { logger } from "@/utils/logger";
 
 const MAX_LOGIN_ATTEMPTS = 5;
@@ -24,11 +25,14 @@ export class AuthService {
 
     const hashedPassword = await hashPassword(data.password);
 
+    const rolePermissions = getRolePermissions(UserRole.STUDENT);
+
     const user = await userRepository.create({
       name: data.name,
       email: data.email,
       password: hashedPassword,
       provider: AuthProvider.LOCAL,
+      permissions: rolePermissions,
     });
     
     logger.info(`User registered successfully: ${user.email}`);
@@ -38,6 +42,7 @@ export class AuthService {
       name: user.name,
       email: user.email,
       role: user.role,
+      permissions: user.permissions,
     };
   }
 
@@ -78,6 +83,7 @@ export class AuthService {
         name: user.name,
         email: user.email,
         role: user.role,
+        permissions: user.permissions,
       },
       accessToken,
       refreshToken,
@@ -183,6 +189,21 @@ export class AuthService {
     }
   }
 
+  async getProfile(userId: string) {
+    const user = await userRepository.findById(userId);
+
+    if (!user) throw new AppError(ERROR_MESSAGES.NOT_FOUND, STATUS_CODES.NOT_FOUND);
+
+    return {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      avatar: user.avatar,
+      permissions: user.permissions,
+    };
+  }
+
   async updateProfile(userId: string, data: UpdateProfileInput) {
     const user = await userRepository.update(userId, {
       ...(data.name && { name: data.name }),
@@ -196,6 +217,7 @@ export class AuthService {
       name: user.name,
       email: user.email,
       avatar: user.avatar,
+      permissions: user.permissions,
     };
   }
 
@@ -216,7 +238,7 @@ export class AuthService {
     let user = await userRepository.findByEmail(payload.email);
     
     if (!user) {
-      // Create new user for google
+      const rolePermissions = getRolePermissions(UserRole.STUDENT);
       user = await userRepository.create({
         name: payload.name || payload.email.split('@')[0],
         email: payload.email,
@@ -224,6 +246,7 @@ export class AuthService {
         providerId: payload.sub,
         avatar: payload.picture,
         isVerified: payload.email_verified || false,
+        permissions: rolePermissions,
       });
       logger.info(`New user registered via Google: ${user.email}`);
     } else {
@@ -251,6 +274,7 @@ export class AuthService {
         email: user.email,
         role: user.role,
         avatar: user.avatar,
+        permissions: user.permissions,
       },
       accessToken,
       refreshToken,

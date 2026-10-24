@@ -1,9 +1,9 @@
 import type { CardProps, SkeletonProps } from "antd";
 import type { ReactNode } from "react";
 
-export type CardVariant = "default" | "borderless" | "filled";
+export type CardVariant = "outlined" | "borderless";
 
-export interface BaseCardProps extends Omit<CardProps, "children" | "title" | "extra"> {
+export interface BaseCardProps extends Omit<CardProps, "children" | "title" | "extra" | "variant" | "role" | "content"> {
   children?: ReactNode;
   title?: ReactNode;
   subtitle?: ReactNode;
@@ -15,6 +15,8 @@ export interface BaseCardProps extends Omit<CardProps, "children" | "title" | "e
   variant?: CardVariant;
   fullWidth?: boolean;
   responsive?: boolean;
+  role?: ReactNode;
+  content?: ReactNode;
 }
 
 export interface StatsCardProps extends BaseCardProps {
@@ -26,13 +28,11 @@ export interface StatsCardProps extends BaseCardProps {
 export interface ProfileCardProps extends BaseCardProps {
   avatar?: ReactNode;
   name?: ReactNode;
-  role?: ReactNode;
   meta?: ReactNode;
 }
 
 export interface InfoCardProps extends BaseCardProps {
   label?: ReactNode;
-  content?: ReactNode;
 }
 
 export interface EmptyCardProps extends BaseCardProps {
