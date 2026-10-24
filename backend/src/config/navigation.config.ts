@@ -1,0 +1,77 @@
+import { NavigationItem } from "@/types/navigation.types";
+import { PermissionCode } from "@/types/permission.types";
+
+export const NAVIGATION_ITEMS: NavigationItem[] = [
+  {
+    key: "dashboard",
+    label: "Dashboard",
+    path: "/dashboard",
+    icon: "DashboardOutlined",
+    permission: PermissionCode.DASHBOARD_VIEW,
+    order: 1,
+  },
+  {
+    key: "students",
+    label: "Students",
+    path: "/dashboard/students",
+    icon: "TeamOutlined",
+    permission: PermissionCode.STUDENT_VIEW,
+    order: 2,
+  },
+  {
+    key: "teachers",
+    label: "Teachers",
+    path: "/dashboard/teachers",
+    icon: "UserOutlined",
+    permission: PermissionCode.TEACHER_VIEW,
+    order: 3,
+  },
+  {
+    key: "parents",
+    label: "Parents",
+    path: "/dashboard/parents",
+    icon: "UserSwitchOutlined",
+    permission: PermissionCode.PARENT_VIEW,
+    order: 4,
+  },
+  {
+    key: "classes",
+    label: "Classes",
+    path: "/dashboard/classes",
+    icon: "ClassOutlined",
+    permission: PermissionCode.CLASS_VIEW,
+    order: 5,
+  },
+  {
+    key: "attendance",
+    label: "Attendance",
+    path: "/dashboard/attendance",
+    icon: "CheckCircleOutlined",
+    permission: PermissionCode.ATTENDANCE_VIEW,
+    order: 6,
+  },
+  {
+    key: "grades",
+    label: "Grades",
+    path: "/dashboard/grades",
+    icon: "FileTextOutlined",
+    permission: PermissionCode.GRADE_VIEW,
+    order: 7,
+  },
+  {
+    key: "reports",
+    label: "Reports",
+    path: "/dashboard/reports",
+    icon: "BarChartOutlined",
+    permission: PermissionCode.REPORT_VIEW,
+    order: 8,
+  },
+  {
+    key: "settings",
+    label: "Settings",
+    path: "/dashboard/settings",
+    icon: "SettingOutlined",
+    permission: PermissionCode.SETTING_VIEW,
+    order: 9,
+  },
+];
